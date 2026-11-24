@@ -82,6 +82,10 @@ filters.forEach(button => button.addEventListener('click', () => {
     card.animate([start,{transform:'translate(0,0)',opacity:1}],{duration:360,easing:'cubic-bezier(.18,.7,.2,1)',delay:Math.min(index,5)*13});
   });
 }));
+document.querySelectorAll('[data-open-filter]').forEach(link => link.addEventListener('click', () => {
+  const button = filters.find(item => item.dataset.filter === link.dataset.openFilter);
+  if (button && button.getAttribute('aria-pressed') !== 'true') button.click();
+}));
 close.addEventListener('click', dismiss);
 dialog.addEventListener('cancel', event => { event.preventDefault(); dismiss(); });
 dialog.addEventListener('click', event => { if (event.target === dialog) dismiss(); });
