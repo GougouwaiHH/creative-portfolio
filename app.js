@@ -47,8 +47,13 @@ function showIndex() {
   const spotlight = document.querySelector('#spotlight-link');
   const image = document.querySelector('#spotlight-image');
   const buttons = [...document.querySelectorAll('[data-spotlight]')];
+  let active = 0;
+  let touchStart;
+  let lastSwipe = -Infinity;
+
   function selectSpotlight(id) {
     const project = byId.get(id);
+    active = buttons.findIndex(button => button.dataset.spotlight === id);
     buttons.forEach(button => button.setAttribute('aria-pressed', String(button.dataset.spotlight === id)));
     spotlight.href = hrefFor(id);
     spotlight.querySelector('span').textContent = decks[id] && !decks[id].partial ? '阅读完整方案' : '查看作品';
@@ -59,6 +64,31 @@ function showIndex() {
     document.querySelector('#spotlight-note').textContent = project.note || '';
     if (!motion.matches) image.animate([{opacity:.58,transform:'scale(1.018)'},{opacity:1,transform:'scale(1)'}], {duration:430,easing:'cubic-bezier(.2,.7,.2,1)'});
   }
+  function stepSpotlight(delta) {
+    const index = (active + delta + buttons.length) % buttons.length;
+    selectSpotlight(buttons[index].dataset.spotlight);
+  }
+  spotlight.addEventListener('keydown', event => {
+    if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
+    event.preventDefault();
+    stepSpotlight(event.key === 'ArrowRight' ? 1 : -1);
+  });
+  spotlight.addEventListener('pointerdown', event => {
+    if (event.pointerType === 'touch') touchStart = {x:event.clientX,y:event.clientY};
+  });
+  spotlight.addEventListener('pointercancel', () => { touchStart = null; });
+  spotlight.addEventListener('pointerup', event => {
+    if (!touchStart) return;
+    const dx = event.clientX - touchStart.x;
+    const dy = event.clientY - touchStart.y;
+    touchStart = null;
+    if (Math.abs(dx) < 44 || Math.abs(dx) <= Math.abs(dy)) return;
+    lastSwipe = performance.now();
+    stepSpotlight(dx < 0 ? 1 : -1);
+  });
+  spotlight.addEventListener('click', event => {
+    if (performance.now() - lastSwipe < 300) event.preventDefault();
+  });
   buttons.forEach(button => button.addEventListener('click', () => selectSpotlight(button.dataset.spotlight)));
   selectSpotlight('huawei');
   document.querySelector('#h5-projects').innerHTML = h5Projects.map(item => `
