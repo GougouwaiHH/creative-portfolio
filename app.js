@@ -190,7 +190,7 @@ function setupReader(project, deck) {
   }
   window.addEventListener('hashchange', restorePage);
   restorePage();
-  if (/^#page-\d+$/.test(location.hash)) requestAnimationFrame(() => reader.scrollIntoView({block:'start'}));
+  if (/^#page-\d+$/.test(location.hash)) requestAnimationFrame(() => reader.scrollIntoView({block:'start',behavior:'instant'}));
 }
 
 function showProject() {
